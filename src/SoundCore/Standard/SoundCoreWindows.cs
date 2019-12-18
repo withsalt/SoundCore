@@ -4,13 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SoundCore.Standard
 {
     public class SoundCoreWindows : ISoundCore
     {
-        private static readonly Queue<CacheBuffer> _cache = new Queue<CacheBuffer>();
+        private static readonly Queue<DataCache> _cache = new Queue<DataCache>();
         private static readonly object _cacheLocker = new object();
         private static Task _playDataTask = null;
         private static IWaveIn _waveIn = null;
@@ -38,13 +39,19 @@ namespace SoundCore.Standard
 
         public void Play(byte[] data, bool isLast = false)
         {
+            
             if (_playDataTask == null || _playDataTask.Status != TaskStatus.Running)
             {
                 _playDataTask = Task.Run(() => PlayDataAsync());
+                //Wait for task start.
+                while(_playDataTask.Status != TaskStatus.Running)
+                {
+                    Thread.Sleep(1);
+                }
             }
             lock (_cacheLocker)
             {
-                _cache.Enqueue(new CacheBuffer(data, isLast));
+                _cache.Enqueue(new DataCache(data, isLast));
             }
         }
 
@@ -61,6 +68,10 @@ namespace SoundCore.Standard
 
         public async Task PlayWav(string path)
         {
+            if (!File.Exists(path))
+            {
+                throw new Exception("Play file is not exist.");
+            }
             WaveStream readerStream = new WaveFileReader(path);
             if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
             {
@@ -159,7 +170,7 @@ namespace SoundCore.Standard
 
                 while (!status)
                 {
-                    CacheBuffer data = null;
+                    DataCache data = null;
                     lock (_cacheLocker)
                     {
                         if (_cache.Count == 0)
@@ -187,7 +198,7 @@ namespace SoundCore.Standard
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                throw ex;
             }
             finally
             {
@@ -195,8 +206,12 @@ namespace SoundCore.Standard
                 {
                     _cache.Clear();
                 }
-                status = false;
             }
+        }
+
+        public void Pause()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
