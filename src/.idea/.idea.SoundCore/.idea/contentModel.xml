@@ -1,47 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\sysru\.Rider2019.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\sysru\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_SoundCore.1248138286.00" t="ExcludeRecursive" />
-    <e p="E:\CSharp\Projects\SoundCore\src" t="IncludeFlat">
-      <e p="demo" t="Include">
-        <e p="SC.Play" t="IncludeRecursive">
-          <e p="audio" t="Include">
-            <e p="01.pcm" t="Include" />
-            <e p="02.pcm" t="Include" />
-            <e p="03.pcm" t="Include" />
-            <e p="04.wav" t="Include" />
-          </e>
-          <e p="bin" t="ExcludeRecursive" />
-          <e p="obj" t="ExcludeRecursive">
-            <e p="Debug" t="Include">
-              <e p="netcoreapp3.1" t="Include">
-                <e p="SC.Play.AssemblyInfo.cs" t="Include" />
-              </e>
-            </e>
-          </e>
-          <e p="Program.cs" t="Include" />
-          <e p="Properties" t="Include">
-            <e p="PublishProfiles" t="Include">
-              <e p="FolderProfile.pubxml" t="Include" />
-            </e>
-          </e>
-          <e p="SC.Play.csproj" t="IncludeRecursive" />
-        </e>
-        <e p="SC.Record" t="IncludeRecursive">
-          <e p="bin" t="ExcludeRecursive" />
-          <e p="obj" t="ExcludeRecursive">
-            <e p="Debug" t="Include">
-              <e p="netcoreapp3.1" t="Include">
-                <e p="SC.Record.AssemblyInfo.cs" t="Include" />
-              </e>
-            </e>
-          </e>
-          <e p="Program.cs" t="Include" />
-          <e p="SC.Record.csproj" t="IncludeRecursive" />
-        </e>
-      </e>
-      <e p="packages" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.Rider2019.3/system/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.Rider2019.3/system/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_SoundCore.1407258911.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="SoundCore" t="IncludeRecursive">
         <e p="Alsa" t="Include">
           <e p="Interop" t="Include">
@@ -61,7 +23,6 @@
             </e>
           </e>
         </e>
-        <e p="bin" t="ExcludeRecursive" />
         <e p="Enums" t="Include">
           <e p="State.cs" t="Include" />
         </e>
@@ -73,13 +34,6 @@
           <e p="RecordEventArgs.cs" t="Include" />
           <e p="WavHeader.cs" t="Include" />
         </e>
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netstandard2.1" t="Include">
-              <e p="SoundCore.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
         <e p="Readme.txt" t="Include" />
         <e p="SoundConnectionSettings.cs" t="Include" />
         <e p="SoundCore.csproj" t="IncludeRecursive" />
@@ -88,8 +42,49 @@
           <e p="SoundCoreLinux.cs" t="Include" />
           <e p="SoundCoreWindows.cs" t="Include" />
         </e>
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.1" t="Include">
+              <e p="SoundCore.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
       </e>
       <e p="SoundCore.sln" t="IncludeFlat" />
+      <e p="demo" t="Include">
+        <e p="SC.Play" t="IncludeRecursive">
+          <e p="Program.cs" t="Include" />
+          <e p="SC.Play.csproj" t="IncludeRecursive" />
+          <e p="audio" t="Include">
+            <e p="01.pcm" t="Include" />
+            <e p="02.pcm" t="Include" />
+            <e p="03.pcm" t="Include" />
+            <e p="04.wav" t="Include" />
+          </e>
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="netcoreapp3.1" t="Include">
+                <e p="SC.Play.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+        <e p="SC.Record" t="IncludeRecursive">
+          <e p="Program.cs" t="Include" />
+          <e p="SC.Record.csproj" t="IncludeRecursive" />
+          <e p="bin" t="ExcludeRecursive" />
+          <e p="obj" t="ExcludeRecursive">
+            <e p="Debug" t="Include">
+              <e p="netcoreapp3.1" t="Include">
+                <e p="SC.Record.AssemblyInfo.cs" t="Include" />
+              </e>
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
     </e>
   </component>
 </project>
