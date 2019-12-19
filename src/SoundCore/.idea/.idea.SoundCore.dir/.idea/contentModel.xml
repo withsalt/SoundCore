@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\sysru\.Rider2019.3\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\sysru\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_.19.00" t="ExcludeRecursive" />
+    <e p="E:\CSharp\Projects\SoundCore\src\SoundCore" t="IncludeRecursive">
+      <e p="Alsa" t="Include">
+        <e p="Interop" t="Include">
+          <e p="Alsa" t="Include">
+            <e p="Interop.alsa.cs" t="Include" />
+            <e p="Interop.alsa.struct.cs" t="Include" />
+          </e>
+          <e p="Interop.Libraries.cs" t="Include" />
+          <e p="Libc" t="Include">
+            <e p="Interop.close.cs" t="Include" />
+            <e p="Interop.ioctl.cs" t="Include" />
+            <e p="Interop.mmap.cs" t="Include" />
+            <e p="Interop.munmap.cs" t="Include" />
+            <e p="Interop.open.cs" t="Include" />
+            <e p="Interop.read.cs" t="Include" />
+            <e p="Interop.write.cs" t="Include" />
+          </e>
+        </e>
+      </e>
+      <e p="bin" t="ExcludeRecursive" />
+      <e p="Enums" t="Include">
+        <e p="State.cs" t="Include" />
+      </e>
+      <e p="Interface" t="Include">
+        <e p="ISoundCore.cs" t="Include" />
+      </e>
+      <e p="Model" t="Include">
+        <e p="DataCache.cs" t="Include" />
+        <e p="RecordEventArgs.cs" t="Include" />
+        <e p="WavHeader.cs" t="Include" />
+      </e>
+      <e p="obj" t="ExcludeRecursive">
+        <e p="Debug" t="Include">
+          <e p="netstandard2.1" t="Include">
+            <e p="SoundCore.AssemblyInfo.cs" t="Include" />
+          </e>
+        </e>
+      </e>
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Readme.txt" t="Include" />
+      <e p="SoundConnectionSettings.cs" t="Include" />
+      <e p="SoundCore.csproj" t="IncludeRecursive" />
+      <e p="SoundCoreBuilder.cs" t="Include" />
+      <e p="Standard" t="Include">
+        <e p="SoundCoreLinux.cs" t="Include" />
+        <e p="SoundCoreWindows.cs" t="Include" />
+      </e>
+    </e>
+  </component>
+</project>

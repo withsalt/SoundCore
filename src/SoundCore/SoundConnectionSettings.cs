@@ -24,17 +24,17 @@ namespace SoundCore
         /// <summary>
         /// The sample rate of recording.
         /// </summary>
-        public uint RecordingSampleRate { get; set; } = 16000;
+        public uint SampleRate { get; set; } = 16000;
 
         /// <summary>
         /// The channels of recording. 
         /// </summary>
-        public ushort RecordingChannels { get; set; } = 1;
+        public ushort Channels { get; set; } = 1;
 
         /// <summary>
         /// The bits per sample of recording.
         /// </summary>
-        public ushort RecordingBitsPerSample { get; set; } = 16;
+        public ushort BitsPerSample { get; set; } = 16;
 
         /// <summary>
         /// 

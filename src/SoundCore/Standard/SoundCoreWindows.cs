@@ -160,7 +160,7 @@ namespace SoundCore.Standard
             try
             {
                 using WaveOutEvent wo = new WaveOutEvent();
-                BufferedWaveProvider rs = new BufferedWaveProvider(new WaveFormat((int)_settings.RecordingSampleRate, _settings.RecordingChannels))
+                BufferedWaveProvider rs = new BufferedWaveProvider(new WaveFormat((int)_settings.SampleRate, _settings.Channels))
                 {
                     BufferLength = _settings.MaxBufferLength,  //针对长文本，请标准缓冲区足够大
                     DiscardOnBufferOverflow = true
