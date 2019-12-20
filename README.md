@@ -11,7 +11,9 @@ sudo apt install libasound2-dev
 ````
 
 ## How to start
+
 ####播放  
+
 1、Create a api.  
 程序会检测当前的操作系统，并返回对应的受支持的对象。  
 ```csharp
@@ -37,6 +39,7 @@ api.Play(null, true);
 ```
 
 ####录制  
+
 等我先把Linux录制写完后一起编写。  
 
 ## 编译和运行  
