@@ -6,6 +6,22 @@ namespace SoundCore
 {
     public class SoundConnectionSettings
     {
+        public SoundConnectionSettings()
+        {
+
+        }
+
+        public SoundConnectionSettings(uint sampleRate)
+        {
+            this.SampleRate = sampleRate;
+        }
+
+        public SoundConnectionSettings(uint sampleRate, ushort channels)
+        {
+            this.SampleRate = sampleRate;
+            this.Channels = channels;
+        }
+
         /// <summary>
         /// The playback device name of the sound device is connected to.
         /// </summary>
