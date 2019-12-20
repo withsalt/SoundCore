@@ -2,6 +2,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -247,24 +248,23 @@ namespace SoundCore.Standard
 
         public bool Stop()
         {
-            var wait = new ManualResetEvent(false);
-            bool stopState = false;
-            var task = Task.Run(() =>
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            State = State.Stopping;
+            while (true)
             {
-                State = State.Stopping;
-                wait.Set();
-                while (true)
+                if (State == State.Stopped)
                 {
-                    if (State == State.Stopped)
-                    {
-                        stopState = true;
-                        break;
-                    }
+                    return true;
                 }
-            });
-            wait.WaitOne(1000);
-            task.Dispose();
-            return stopState;
+                if (sw.ElapsedMilliseconds > 1000)
+                {
+                    break;
+                }
+                Thread.Sleep(1);
+            }
+            sw.Stop();
+            return false;
         }
 
         #region Private
