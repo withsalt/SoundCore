@@ -12,15 +12,16 @@ namespace SC.Play
             byte[] data = File.ReadAllBytes("audio/04.wav");
             int frameSize = 3200;
 
-            ISoundCore api = SoundCoreBuilder.Create(new SoundConnectionSettings());
+            using (ISoundCore api = SoundCoreBuilder.Create(new SoundConnectionSettings()))
+            {
+                api.PlayWav(data);
+            }
 
             //for (int i = 0; i < data.Length; i += frameSize)
             //{
             //    api.Play(SubArray(data, i, frameSize));
             //}
             //api.Play(null, true);
-
-            api.PlayWav(data);
 
             Console.WriteLine("播放结束。");
             Console.ReadKey(false);

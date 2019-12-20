@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SoundCore.Standard
 {
-    public class SoundCoreLinux : ISoundCore
+    public sealed class SoundCoreLinux : ISoundCore
     {
         private IntPtr _playbackPcm;
         private IntPtr _recordingPcm;
@@ -28,12 +28,27 @@ namespace SoundCore.Standard
 
         private static SoundConnectionSettings _settings = null;
 
+        public event EventHandler<RecordEventArgs> OnMessage;
+
         public SoundCoreLinux(SoundConnectionSettings settings)
         {
             _settings = settings;
+            OpenPlaybackPcm();
         }
 
-        public event EventHandler<RecordEventArgs> OnMessage;
+        public void Dispose()
+        {
+            try
+            {
+                ClosePlaybackPcm();
+                CloseRecordingPcm();
+                CloseMixer();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
         #region Play
 
@@ -69,18 +84,8 @@ namespace SoundCore.Standard
                     ms.Seek(44, SeekOrigin.Begin);
                     ms.Read(pcm, 0, data.Length - 44);
                 }
-
-                OpenPlaybackPcm();
                 PcmInitialize(_playbackPcm, header, ref @params, ref dir);
                 WriteStream(pcm, header, ref @params, ref dir);
-
-                while (true)
-                {
-                    await Task.Delay(30);
-                    Console.WriteLine(@params + "," + dir);
-                }
-
-                ClosePlaybackPcm();
             }
             catch (Exception ex)
             {
@@ -107,7 +112,6 @@ namespace SoundCore.Standard
             int dir = 0;
             try
             {
-                OpenPlaybackPcm();
                 WavHeader header = CreateWavHeader(_settings);
                 PcmInitialize(_playbackPcm, header, ref @params, ref dir);
                 while (!status)
@@ -234,13 +238,6 @@ namespace SoundCore.Standard
 
         #region Common
 
-        protected void Dispose()
-        {
-            ClosePlaybackPcm();
-            CloseRecordingPcm();
-            CloseMixer();
-        }
-
         public void Pause()
         {
             throw new NotImplementedException();
@@ -260,7 +257,7 @@ namespace SoundCore.Standard
                 snd_pcm_access_t.SND_PCM_ACCESS_RW_INTERLEAVED);
             ThrowErrorMessage(_errorNum, "Can not set access mode.");
 
-            _errorNum = (int) (header.BitsPerSample / 8) switch
+            _errorNum = (int)(header.BitsPerSample / 8) switch
             {
                 1 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_U8),
                 2 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S16_LE),
@@ -292,7 +289,7 @@ namespace SoundCore.Standard
                 ThrowErrorMessage(_errorNum, "Can not get period size.");
             }
 
-            int bufferSize = (int) frames * header.BlockAlign;
+            int bufferSize = (int)frames * header.BlockAlign;
             // In Interop, the frames is defined as ulong. But actucally, the value of bufferSize won't be too big.
             byte[] readBuffer = new byte[bufferSize];
             fixed (byte* buffer = readBuffer)
@@ -309,7 +306,7 @@ namespace SoundCore.Standard
                         Array.Copy(data, i, readBuffer, 0, bufferSize);
                     }
 
-                    _errorNum = Interop.snd_pcm_writei(_playbackPcm, (IntPtr) buffer, frames);
+                    _errorNum = Interop.snd_pcm_writei(_playbackPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage(_errorNum, "Can not write data to the device.");
                 }
             }
@@ -326,14 +323,14 @@ namespace SoundCore.Standard
             }
 
             bufferSize = frames * header.BlockAlign;
-            byte[] readBuffer = new byte[(int) bufferSize];
+            byte[] readBuffer = new byte[(int)bufferSize];
             saveStream.Position = 44;
 
             fixed (byte* buffer = readBuffer)
             {
-                for (int i = 0; i < (int) (header.Subchunk2Size / bufferSize); i++)
+                for (int i = 0; i < (int)(header.Subchunk2Size / bufferSize); i++)
                 {
-                    _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr) buffer, frames);
+                    _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage(_errorNum, "Can not read data from the device.");
 
                     saveStream.Write(readBuffer);
@@ -441,19 +438,19 @@ namespace SoundCore.Standard
             {
                 WavHeader header = new WavHeader
                 {
-                    ChunkId = new[] {'R', 'I', 'F', 'F'},
+                    ChunkId = new[] { 'R', 'I', 'F', 'F' },
                     ChunkSize =
                         0, //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8 + 36,
-                    Format = new[] {'W', 'A', 'V', 'E'},
-                    Subchunk1ID = new[] {'f', 'm', 't', ' '},
+                    Format = new[] { 'W', 'A', 'V', 'E' },
+                    Subchunk1ID = new[] { 'f', 'm', 't', ' ' },
                     Subchunk1Size = 16,
                     AudioFormat = 1, //PCM音频数据的值为1
                     NumChannels = _settings.Channels,
                     SampleRate = _settings.SampleRate,
                     ByteRate = _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8,
-                    BlockAlign = (ushort) (_settings.BitsPerSample * _settings.Channels / 8),
+                    BlockAlign = (ushort)(_settings.BitsPerSample * _settings.Channels / 8),
                     BitsPerSample = _settings.BitsPerSample,
-                    Subchunk2Id = new[] {'d', 'a', 't', 'a'},
+                    Subchunk2Id = new[] { 'd', 'a', 't', 'a' },
                     Subchunk2Size = 0 //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8
                 };
 

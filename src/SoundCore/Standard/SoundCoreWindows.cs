@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SoundCore.Standard
 {
-    public class SoundCoreWindows : ISoundCore
+    public sealed class SoundCoreWindows : ISoundCore
     {
         private static readonly Queue<DataCache> _cache = new Queue<DataCache>();
         private static readonly object _cacheLocker = new object();
@@ -34,17 +34,17 @@ namespace SoundCore.Standard
 
         public void Dispose()
         {
-
+            throw new NotImplementedException();
         }
 
         public void Play(byte[] data, bool isLast = false)
         {
-            
+
             if (_playDataTask == null || _playDataTask.Status != TaskStatus.Running)
             {
                 _playDataTask = Task.Run(() => PlayDataAsync());
                 //Wait for task start.
-                while(_playDataTask.Status != TaskStatus.Running)
+                while (_playDataTask.Status != TaskStatus.Running)
                 {
                     Thread.Sleep(1);
                 }
