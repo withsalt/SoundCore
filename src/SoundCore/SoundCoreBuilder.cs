@@ -10,6 +10,15 @@ namespace SoundCore
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                //Test libasound2-dev
+                try
+                {
+                    Interop.snd_strerror(0);
+                }
+                catch
+                {
+                    throw new Exception("Plase install 'libasound2-dev' at first.");
+                }
                 return new SoundCoreLinux(settings);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
