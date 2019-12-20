@@ -85,7 +85,7 @@ namespace SoundCore.Standard
 
         public void Record()
         {
-            using (Stream outStream = new MemoryStream(_settings.MaxBufferLength))
+            using (Stream outStream = new MemoryStream())
             {
                 _waveIn = new WaveInEvent();
                 _waveIn.DataAvailable += (s, a) =>
@@ -102,26 +102,25 @@ namespace SoundCore.Standard
 
         public void RecordWav()
         {
-            long length = 0;
-            using (Stream outStream = new MemoryStream(_settings.MaxBufferLength))
+            using (MemoryStream outStream = new MemoryStream())
             {
                 _waveIn = new WaveInEvent();
                 WaveFileWriter writer = new WaveFileWriter(outStream, _waveIn.WaveFormat);
                 _waveIn.DataAvailable += (s, a) =>
                 {
-                    length += a.BytesRecorded;
                     writer.Write(a.Buffer, 0, a.BytesRecorded);
                 };
                 _waveIn.RecordingStopped += (s, e) =>
                 {
-                    byte[] bytes = new byte[length];
-                    outStream.Read(bytes, 0, bytes.Length);
+                    byte[] bytes = new byte[outStream.Length];
                     outStream.Seek(0, SeekOrigin.Begin);
+                    outStream.Read(bytes, 0, bytes.Length);
+
 
                     OnMessage?.Invoke(this, new RecordEventArgs()
                     {
                         Buffer = bytes,
-                        Length = length
+                        Length = bytes.Length
                     });
                 };
                 _waveIn.StartRecording();
@@ -162,7 +161,7 @@ namespace SoundCore.Standard
                 using WaveOutEvent wo = new WaveOutEvent();
                 BufferedWaveProvider rs = new BufferedWaveProvider(new WaveFormat((int)_settings.SampleRate, _settings.Channels))
                 {
-                    BufferLength = _settings.MaxBufferLength,  //针对长文本，请标准缓冲区足够大
+                    BufferLength = _settings.MaxBufferLength,  //请保证播放缓冲区足够大
                     DiscardOnBufferOverflow = true
                 };
                 wo.Init(rs);

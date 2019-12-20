@@ -6,10 +6,12 @@ namespace SoundCore
 {
     public enum State
     {
+        Init,
         Inited,
-        Play,
-        Recod,
+        Playing,
+        Recoding,
         Pause,
-        Stop
+        Stopped,
+        Stopping
     }
 }

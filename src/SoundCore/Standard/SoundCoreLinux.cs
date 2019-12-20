@@ -25,6 +25,7 @@ namespace SoundCore.Standard
         private static readonly Queue<DataCache> _cache = new Queue<DataCache>();
         private static readonly object _cacheLocker = new object();
         private static Task _playDataTask = null;
+        private static State State = State.Init;
 
         private static SoundConnectionSettings _settings = null;
 
@@ -162,6 +163,7 @@ namespace SoundCore.Standard
             {
                 _errorNum = Interop.snd_pcm_open(ref _playbackPcm, _settings.PlaybackDeviceName,
                     snd_pcm_stream_t.SND_PCM_STREAM_PLAYBACK, 0);
+                State = State.Inited;
                 ThrowErrorMessage(_errorNum, "Can not open playback device.");
             }
         }
@@ -188,17 +190,81 @@ namespace SoundCore.Standard
 
         public void Record()
         {
-            throw new NotImplementedException();
+            try
+            {
+                IntPtr @params = new IntPtr();
+                int dir = 0;
+                WavHeader header = CreateWavHeader(_settings);
+
+                PcmInitialize(_recordingPcm, header, ref @params, ref dir);
+                Task.Run(() =>
+                {
+                    ReadStream(header, ref @params, ref dir);
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Record as wav failed. {ex.Message}", ex);
+            }
         }
 
         public void RecordWav()
         {
-            throw new NotImplementedException();
+            try
+            {
+                IntPtr @params = new IntPtr();
+                int dir = 0;
+                WavHeader header = CreateWavHeader(_settings);
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    //Header
+                    ms.Write(new byte[44], 0, 44);
+                    PcmInitialize(_recordingPcm, header, ref @params, ref dir);
+                    Task.Run(() =>
+                    {
+                        ReadStream(ms, header, ref @params, ref dir);
+                        while (State != State.Stopped)
+                        {
+                            Thread.Sleep(10);
+                        }
+                        SetWavHeader(ms, header);
+                        byte[] bytes = new byte[ms.Length];
+                        ms.Read(bytes, 0, bytes.Length);
+                        //back data
+                        OnMessage?.Invoke(this, new RecordEventArgs()
+                        {
+                            Buffer = bytes,
+                            Length = bytes.Length
+                        });
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Record as wav failed. {ex.Message}", ex);
+            }
         }
 
         public bool Stop()
         {
-            throw new NotImplementedException();
+            var wait = new ManualResetEvent(false);
+            bool stopState = false;
+            var task = Task.Run(() =>
+            {
+                State = State.Stopping;
+                wait.Set();
+                while (true)
+                {
+                    if (State == State.Stopped)
+                    {
+                        stopState = true;
+                        break;
+                    }
+                }
+            });
+            wait.WaitOne(1000);
+            task.Dispose();
+            return stopState;
         }
 
         #region Private
@@ -229,6 +295,61 @@ namespace SoundCore.Standard
                 ThrowErrorMessage(_errorNum, "Close recording device error.");
 
                 _recordingPcm = default;
+            }
+        }
+
+        private void SetWavHeader(Stream wavStream, WavHeader header)
+        {
+            Span<byte> writeBuffer2 = stackalloc byte[2];
+            Span<byte> writeBuffer4 = stackalloc byte[4];
+            try
+            {
+                wavStream.Seek(0, SeekOrigin.Begin);
+
+                Encoding.ASCII.GetBytes(header.ChunkId, writeBuffer4);
+                wavStream.Write(writeBuffer4);
+
+                BinaryPrimitives.WriteInt64LittleEndian(writeBuffer4, wavStream.Length - 36);
+                wavStream.Write(writeBuffer4);
+
+                Encoding.ASCII.GetBytes(header.Format, writeBuffer4);
+                wavStream.Write(writeBuffer4);
+
+                Encoding.ASCII.GetBytes(header.Subchunk1ID, writeBuffer4);
+                wavStream.Write(writeBuffer4);
+
+                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Subchunk1Size);
+                wavStream.Write(writeBuffer4);
+
+                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.AudioFormat);
+                wavStream.Write(writeBuffer2);
+
+                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.NumChannels);
+                wavStream.Write(writeBuffer2);
+
+                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SampleRate);
+                wavStream.Write(writeBuffer4);
+
+                BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.ByteRate);
+                wavStream.Write(writeBuffer4);
+
+                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BlockAlign);
+                wavStream.Write(writeBuffer2);
+
+                BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BitsPerSample);
+                wavStream.Write(writeBuffer2);
+
+                Encoding.ASCII.GetBytes(header.Subchunk2Id, writeBuffer4);
+                wavStream.Write(writeBuffer4);
+
+                BinaryPrimitives.WriteInt64LittleEndian(writeBuffer4, wavStream.Length);
+                wavStream.Write(writeBuffer4);
+
+                wavStream.Seek(0, SeekOrigin.Begin);
+            }
+            catch
+            {
+                throw new Exception("Write WAV header error.");
             }
         }
 
@@ -314,7 +435,8 @@ namespace SoundCore.Standard
 
         private unsafe void ReadStream(Stream saveStream, WavHeader header, ref IntPtr @params, ref int dir)
         {
-            ulong frames, bufferSize;
+            ulong frames;
+            uint bufferSize;
 
             fixed (int* dirP = &dir)
             {
@@ -322,22 +444,45 @@ namespace SoundCore.Standard
                 ThrowErrorMessage(_errorNum, "Can not get period size.");
             }
 
-            bufferSize = frames * header.BlockAlign;
-            byte[] readBuffer = new byte[(int)bufferSize];
-            saveStream.Position = 44;
-
+            bufferSize = (uint)(frames * header.BlockAlign);
+            byte[] readBuffer = new byte[bufferSize];
             fixed (byte* buffer = readBuffer)
             {
-                for (int i = 0; i < (int)(header.Subchunk2Size / bufferSize); i++)
+                while (State != State.Stopping)
                 {
                     _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage(_errorNum, "Can not read data from the device.");
-
                     saveStream.Write(readBuffer);
                 }
             }
+        }
 
-            saveStream.Flush();
+        private unsafe void ReadStream(WavHeader header, ref IntPtr @params, ref int dir)
+        {
+            ulong frames;
+            uint bufferSize;
+
+            fixed (int* dirP = &dir)
+            {
+                _errorNum = Interop.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
+                ThrowErrorMessage(_errorNum, "Can not get period size.");
+            }
+
+            bufferSize = (uint)(frames * header.BlockAlign);
+            byte[] readBuffer = new byte[bufferSize];
+            fixed (byte* buffer = readBuffer)
+            {
+                while (State != State.Stopping)
+                {
+                    _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
+                    ThrowErrorMessage(_errorNum, "Can not read data from the device.");
+                    OnMessage?.Invoke(this, new RecordEventArgs()
+                    {
+                        Buffer = readBuffer,
+                        Length = bufferSize
+                    });
+                }
+            }
         }
 
         private void OpenMixer()
