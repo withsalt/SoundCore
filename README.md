@@ -11,23 +11,23 @@ sudo apt install libasound2-dev
 ````
 
 ## How to start
-####播放
-1、Create a api.
-程序会检测当前的操作系统，并返回对应的受支持的对象。
+####播放  
+1、Create a api.  
+程序会检测当前的操作系统，并返回对应的受支持的对象。  
 ```csharp
 ISoundCore api = SoundCoreBuilder.Create(new SoundConnectionSettings());
 ```
 
-2、Play
-播放一个wav文件或者wav文件数据
+2、Play  
+播放一个wav文件或者wav文件数据  
 ```csharp
 api.PlayWav(data);  //data可以是wav路径或者wav byte数组
 ```
-播放一个pcm文件
+播放一个pcm文件  
 ```csharp
 api.Play(data, true);  //当播放一个完整的pcm数据时，请指定第二个参数为true
 ```
-播放连续的pcm数据流
+播放连续的pcm数据流  
 ```csharp
 for (int i = 0; i < data.Length; i += frameSize)
 {
@@ -36,15 +36,15 @@ for (int i = 0; i < data.Length; i += frameSize)
 api.Play(null, true);
 ```
 
-####录制
-等我先把Linux录制写完后一起编写。
+####录制  
+等我先把Linux录制写完后一起编写。  
 
-## 编译和运行
+## 编译和运行  
 ```shell
 cd SC.Play
 dotnet publish -c release -r linux-arm -o YOUR_FOLDER  //Linux arm
 sudo dotnet YOUR_FOLDER/SC.Play.dll
 ```
 
-## 参考和引用
+## 参考和引用  
 1、[alsa.net](https://github.com/ZhangGaoxing/alsa.net "alsa.net")
