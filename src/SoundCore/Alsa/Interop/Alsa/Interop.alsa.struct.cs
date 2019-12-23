@@ -87,3 +87,17 @@ internal enum snd_mixer_selem_channel_id
     SND_MIXER_SCHN_LAST = 31,
     SND_MIXER_SCHN_MONO = SND_MIXER_SCHN_FRONT_LEFT
 }
+
+internal enum snd_pcm_state_t
+{
+    SND_PCM_STATE_OPEN = 0, //Open
+    SND_PCM_STATE_SETUP = 1,     //Setup installed
+    SND_PCM_STATE_PREPARED = 2,     //Ready to start
+    SND_PCM_STATE_RUNNING = 3,     //Running
+    SND_PCM_STATE_XRUN = 4,     //Stopped: underrun (playback) or overrun (capture) detected
+    SND_PCM_STATE_DRAINING = 5,     //Draining: running (playback) or stopped (capture)
+    SND_PCM_STATE_PAUSED = 6,     //Paused
+    SND_PCM_STATE_SUSPENDED = 7,     //Hardware is suspended
+    SND_PCM_STATE_DISCONNECTED = 8,     //Hardware is disconnected
+    SND_PCM_STATE_PRIVATE1 = 9,     //Private - used internally in the library - do not use
+}

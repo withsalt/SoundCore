@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SoundCore.Standard
 {
-    public sealed class SoundCoreLinux : ISoundCore
+    public class SoundCoreLinux : ISoundCore
     {
         private IntPtr _playbackPcm;
         private IntPtr _recordingPcm;
@@ -88,6 +88,7 @@ namespace SoundCore.Standard
                 }
                 PcmInitialize(_playbackPcm, header, ref @params, ref dir);
                 WriteStream(pcm, header, ref @params, ref dir);
+
             }
             catch (Exception ex)
             {
@@ -485,137 +486,161 @@ namespace SoundCore.Standard
             }
         }
 
-        private void OpenMixer()
-        {
-            if (_mixer != default)
-            {
-                return;
-            }
-
-            lock (mixerInitializationLock)
-            {
-                _errorNum = Interop.snd_mixer_open(ref _mixer, 0);
-                ThrowErrorMessage(_errorNum, "Can not open sound device mixer.");
-
-                _errorNum = Interop.snd_mixer_attach(_mixer, _settings.MixerDeviceName);
-                ThrowErrorMessage(_errorNum, "Can not attach sound device mixer.");
-
-                _errorNum = Interop.snd_mixer_selem_register(_mixer, IntPtr.Zero, IntPtr.Zero);
-                ThrowErrorMessage(_errorNum, "Can not register sound device mixer.");
-
-                _errorNum = Interop.snd_mixer_load(_mixer);
-                ThrowErrorMessage(_errorNum, "Can not load sound device mixer.");
-
-                _elem = Interop.snd_mixer_first_elem(_mixer);
-            }
-        }
-
-        private void CloseMixer()
-        {
-            if (_mixer != default)
-            {
-                _errorNum = Interop.snd_mixer_close(_mixer);
-                ThrowErrorMessage(_errorNum, "Close sound device mixer error.");
-
-                _mixer = default;
-                _elem = default;
-            }
-        }
-
-        private WavHeader GetWavHeader(Stream wavStream)
-        {
-            Span<byte> readBuffer2 = stackalloc byte[2];
-            Span<byte> readBuffer4 = stackalloc byte[4];
-            wavStream.Position = 0;
-            WavHeader header = new WavHeader();
-            try
-            {
-                wavStream.Read(readBuffer4);
-                header.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
-
-                wavStream.Read(readBuffer4);
-                header.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
-
-                wavStream.Read(readBuffer4);
-                header.Format = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
-
-                wavStream.Read(readBuffer4);
-                header.Subchunk1ID = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
-
-                wavStream.Read(readBuffer4);
-                header.Subchunk1Size = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
-
-                wavStream.Read(readBuffer2);
-                header.AudioFormat = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
-
-                wavStream.Read(readBuffer2);
-                header.NumChannels = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
-
-                wavStream.Read(readBuffer4);
-                header.SampleRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
-
-                wavStream.Read(readBuffer4);
-                header.ByteRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
-
-                wavStream.Read(readBuffer2);
-                header.BlockAlign = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
-
-                wavStream.Read(readBuffer2);
-                header.BitsPerSample = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
-
-                wavStream.Read(readBuffer4);
-                header.Subchunk2Id = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
-
-                wavStream.Read(readBuffer4);
-                header.Subchunk2Size = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
-            }
-            catch
-            {
-                throw new Exception("Non-standard WAV file.");
-            }
-
-            return header;
-        }
-
-        private WavHeader CreateWavHeader(SoundConnectionSettings settings)
+        private snd_pcm_state_t GetDeviceStatus(IntPtr pcm)
         {
             try
             {
-                WavHeader header = new WavHeader
+                int state = Interop.snd_pcm_status(pcm);
+                if (state < 0)
                 {
-                    ChunkId = new[] { 'R', 'I', 'F', 'F' },
-                    ChunkSize =
-                        0, //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8 + 36,
-                    Format = new[] { 'W', 'A', 'V', 'E' },
-                    Subchunk1ID = new[] { 'f', 'm', 't', ' ' },
-                    Subchunk1Size = 16,
-                    AudioFormat = 1, //PCM音频数据的值为1
-                    NumChannels = _settings.Channels,
-                    SampleRate = _settings.SampleRate,
-                    ByteRate = _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8,
-                    BlockAlign = (ushort)(_settings.BitsPerSample * _settings.Channels / 8),
-                    BitsPerSample = _settings.BitsPerSample,
-                    Subchunk2Id = new[] { 'd', 'a', 't', 'a' },
-                    Subchunk2Size = 0 //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8
-                };
-
-                return header;
+                    ThrowErrorMessage(_errorNum, "Can not get pcm state.");
+                }
+                if (Enum.TryParse(state.ToString(), out snd_pcm_state_t value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new Exception("Pcm state error.");
+                }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                throw new Exception($"Create wav header failed. {ex.Message}", ex);
-            }
+                throw new Exception($"Get pcm state failed. {ex.Message}", ex);
+}
         }
 
-        private void ThrowErrorMessage(int errnum, string message)
+        private void OpenMixer()
+{
+    if (_mixer != default)
+    {
+        return;
+    }
+
+    lock (mixerInitializationLock)
+    {
+        _errorNum = Interop.snd_mixer_open(ref _mixer, 0);
+        ThrowErrorMessage(_errorNum, "Can not open sound device mixer.");
+
+        _errorNum = Interop.snd_mixer_attach(_mixer, _settings.MixerDeviceName);
+        ThrowErrorMessage(_errorNum, "Can not attach sound device mixer.");
+
+        _errorNum = Interop.snd_mixer_selem_register(_mixer, IntPtr.Zero, IntPtr.Zero);
+        ThrowErrorMessage(_errorNum, "Can not register sound device mixer.");
+
+        _errorNum = Interop.snd_mixer_load(_mixer);
+        ThrowErrorMessage(_errorNum, "Can not load sound device mixer.");
+
+        _elem = Interop.snd_mixer_first_elem(_mixer);
+    }
+}
+
+private void CloseMixer()
+{
+    if (_mixer != default)
+    {
+        _errorNum = Interop.snd_mixer_close(_mixer);
+        ThrowErrorMessage(_errorNum, "Close sound device mixer error.");
+
+        _mixer = default;
+        _elem = default;
+    }
+}
+
+private WavHeader GetWavHeader(Stream wavStream)
+{
+    Span<byte> readBuffer2 = stackalloc byte[2];
+    Span<byte> readBuffer4 = stackalloc byte[4];
+    wavStream.Position = 0;
+    WavHeader header = new WavHeader();
+    try
+    {
+        wavStream.Read(readBuffer4);
+        header.ChunkId = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+
+        wavStream.Read(readBuffer4);
+        header.ChunkSize = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+
+        wavStream.Read(readBuffer4);
+        header.Format = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+
+        wavStream.Read(readBuffer4);
+        header.Subchunk1ID = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+
+        wavStream.Read(readBuffer4);
+        header.Subchunk1Size = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+
+        wavStream.Read(readBuffer2);
+        header.AudioFormat = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+
+        wavStream.Read(readBuffer2);
+        header.NumChannels = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+
+        wavStream.Read(readBuffer4);
+        header.SampleRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+
+        wavStream.Read(readBuffer4);
+        header.ByteRate = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+
+        wavStream.Read(readBuffer2);
+        header.BlockAlign = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+
+        wavStream.Read(readBuffer2);
+        header.BitsPerSample = BinaryPrimitives.ReadUInt16LittleEndian(readBuffer2);
+
+        wavStream.Read(readBuffer4);
+        header.Subchunk2Id = Encoding.ASCII.GetString(readBuffer4).ToCharArray();
+
+        wavStream.Read(readBuffer4);
+        header.Subchunk2Size = BinaryPrimitives.ReadUInt32LittleEndian(readBuffer4);
+    }
+    catch
+    {
+        throw new Exception("Non-standard WAV file.");
+    }
+
+    return header;
+}
+
+private WavHeader CreateWavHeader(SoundConnectionSettings settings)
+{
+    try
+    {
+        WavHeader header = new WavHeader
         {
-            if (errnum < 0)
-            {
-                string errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(errnum));
-                Dispose();
-                throw new Exception($"{message}\nError {errnum}. {errorMsg}.");
-            }
-        }
+            ChunkId = new[] { 'R', 'I', 'F', 'F' },
+            ChunkSize =
+                0, //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8 + 36,
+            Format = new[] { 'W', 'A', 'V', 'E' },
+            Subchunk1ID = new[] { 'f', 'm', 't', ' ' },
+            Subchunk1Size = 16,
+            AudioFormat = 1, //PCM音频数据的值为1
+            NumChannels = _settings.Channels,
+            SampleRate = _settings.SampleRate,
+            ByteRate = _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8,
+            BlockAlign = (ushort)(_settings.BitsPerSample * _settings.Channels / 8),
+            BitsPerSample = _settings.BitsPerSample,
+            Subchunk2Id = new[] { 'd', 'a', 't', 'a' },
+            Subchunk2Size = 0 //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8
+        };
+
+        return header;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception($"Create wav header failed. {ex.Message}", ex);
+    }
+}
+
+private void ThrowErrorMessage(int errnum, string message)
+{
+    if (errnum < 0)
+    {
+        string errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(errnum));
+        Dispose();
+        throw new Exception($"{message}\nError {errnum}. {errorMsg}.");
+    }
+}
 
         #endregion
 

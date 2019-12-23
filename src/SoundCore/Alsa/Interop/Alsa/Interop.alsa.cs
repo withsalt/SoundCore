@@ -88,6 +88,12 @@ internal partial class Interop
     internal static extern int snd_mixer_load(IntPtr mixer);
 
     [DllImport(AlsaLibrary)]
+    internal static extern int snd_pcm_status(IntPtr pcm);
+
+    [DllImport(AlsaLibrary)]
+    internal static extern long snd_pcm_avail(IntPtr pcm);
+
+    [DllImport(AlsaLibrary)]
     internal static extern int snd_mixer_selem_register(IntPtr mixer, IntPtr options, IntPtr classp);
 
     /// <returns>snd_mixer_elem_t*</returns>

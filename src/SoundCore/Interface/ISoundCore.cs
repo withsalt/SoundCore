@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SoundCore
 {
-    public interface ISoundCore : IDisposable
+    public interface ISoundCore
     {
         #region Event
 
