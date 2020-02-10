@@ -1,4 +1,5 @@
-﻿using SoundCore.Model;
+﻿using AlsaSharp;
+using SoundCore.Model;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -99,7 +100,7 @@ namespace SoundCore.Standard
                     Thread.Sleep(500);
                     status = GetDeviceStatus(_playbackPcm);
 
-                    long datalength = Interop.snd_pcm_avail(_playbackPcm);
+                    long datalength = Natives.snd_pcm_avail(_playbackPcm);
 
                     //int state = Interop.snd_pcm_status(_playbackPcm, status);
 
@@ -185,7 +186,7 @@ namespace SoundCore.Standard
 
             lock (playbackInitializationLock)
             {
-                _errorNum = Interop.snd_pcm_open(ref _playbackPcm, _settings.PlaybackDeviceName,
+                _errorNum = Natives.snd_pcm_open(ref _playbackPcm, _settings.PlaybackDeviceName,
                     snd_pcm_stream_t.SND_PCM_STREAM_PLAYBACK, 0);
                 State = State.Inited;
                 ThrowErrorMessage(_errorNum, "Can not open playback device.");
@@ -196,10 +197,10 @@ namespace SoundCore.Standard
         {
             if (_playbackPcm != default)
             {
-                _errorNum = Interop.snd_pcm_drop(_playbackPcm);
+                _errorNum = Natives.snd_pcm_drop(_playbackPcm);
                 ThrowErrorMessage(_errorNum, "Drop playback device error.");
 
-                _errorNum = Interop.snd_pcm_close(_playbackPcm);
+                _errorNum = Natives.snd_pcm_close(_playbackPcm);
                 ThrowErrorMessage(_errorNum, "Close playback device error.");
 
                 _playbackPcm = default;
@@ -302,7 +303,7 @@ namespace SoundCore.Standard
 
             lock (recordingInitializationLock)
             {
-                _errorNum = Interop.snd_pcm_open(ref _recordingPcm, _settings.RecordingDeviceName,
+                _errorNum = Natives.snd_pcm_open(ref _recordingPcm, _settings.RecordingDeviceName,
                     snd_pcm_stream_t.SND_PCM_STREAM_CAPTURE, 0);
                 ThrowErrorMessage(_errorNum, "Can not open recording device.");
             }
@@ -312,10 +313,10 @@ namespace SoundCore.Standard
         {
             if (_recordingPcm != default)
             {
-                _errorNum = Interop.snd_pcm_drop(_recordingPcm);
+                _errorNum = Natives.snd_pcm_drop(_recordingPcm);
                 ThrowErrorMessage(_errorNum, "Drop recording device error.");
 
-                _errorNum = Interop.snd_pcm_close(_recordingPcm);
+                _errorNum = Natives.snd_pcm_close(_recordingPcm);
                 ThrowErrorMessage(_errorNum, "Close recording device error.");
 
                 _recordingPcm = default;
@@ -392,36 +393,36 @@ namespace SoundCore.Standard
 
         private unsafe void PcmInitialize(IntPtr pcm, WavHeader header, ref IntPtr @params, ref int dir)
         {
-            _errorNum = Interop.snd_pcm_hw_params_malloc(ref @params);
+            _errorNum = Natives.snd_pcm_hw_params_malloc(ref @params);
             ThrowErrorMessage(_errorNum, "Can not allocate parameters object.");
 
-            _errorNum = Interop.snd_pcm_hw_params_any(pcm, @params);
+            _errorNum = Natives.snd_pcm_hw_params_any(pcm, @params);
             ThrowErrorMessage(_errorNum, "Can not fill parameters object.");
 
-            _errorNum = Interop.snd_pcm_hw_params_set_access(pcm, @params,
+            _errorNum = Natives.snd_pcm_hw_params_set_access(pcm, @params,
                 snd_pcm_access_t.SND_PCM_ACCESS_RW_INTERLEAVED);
             ThrowErrorMessage(_errorNum, "Can not set access mode.");
 
-            _errorNum = (int) (header.BitsPerSample / 8) switch
+            _errorNum = (int)(header.BitsPerSample / 8) switch
             {
-                1 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_U8),
-                2 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S16_LE),
-                3 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S24_LE),
+                1 => Natives.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_U8),
+                2 => Natives.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S16_LE),
+                3 => Natives.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S24_LE),
                 _ => throw new Exception("Bits per sample error. Please reset the value of RecordingBitsPerSample."),
             };
             ThrowErrorMessage(_errorNum, "Can not set format.");
 
-            _errorNum = Interop.snd_pcm_hw_params_set_channels(pcm, @params, header.NumChannels);
+            _errorNum = Natives.snd_pcm_hw_params_set_channels(pcm, @params, header.NumChannels);
             ThrowErrorMessage(_errorNum, "Can not set channel.");
 
             uint val = header.SampleRate;
             fixed (int* dirP = &dir)
             {
-                _errorNum = Interop.snd_pcm_hw_params_set_rate_near(pcm, @params, &val, dirP);
+                _errorNum = Natives.snd_pcm_hw_params_set_rate_near(pcm, @params, (IntPtr)&val, dirP);
                 ThrowErrorMessage(_errorNum, "Can not set rate.");
             }
 
-            _errorNum = Interop.snd_pcm_hw_params(pcm, @params);
+            _errorNum = Natives.snd_pcm_hw_params(pcm, @params);
             ThrowErrorMessage(_errorNum, "Can not set hardware parameters.");
         }
 
@@ -430,11 +431,11 @@ namespace SoundCore.Standard
             ulong frames;
             fixed (int* dirP = &dir)
             {
-                _errorNum = Interop.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
+                _errorNum = Natives.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
                 ThrowErrorMessage(_errorNum, "Can not get period size.");
             }
 
-            int bufferSize = (int) frames * header.BlockAlign;
+            int bufferSize = (int)frames * header.BlockAlign;
             // In Interop, the frames is defined as ulong. But actucally, the value of bufferSize won't be too big.
             byte[] readBuffer = new byte[bufferSize];
             fixed (byte* buffer = readBuffer)
@@ -451,7 +452,7 @@ namespace SoundCore.Standard
                         Array.Copy(data, i, readBuffer, 0, bufferSize);
                     }
 
-                    _errorNum = Interop.snd_pcm_writei(_playbackPcm, (IntPtr) buffer, frames);
+                    _errorNum = (int)Natives.snd_pcm_writei(_playbackPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage(_errorNum, "Can not write data to the device.");
                 }
             }
@@ -464,17 +465,17 @@ namespace SoundCore.Standard
 
             fixed (int* dirP = &dir)
             {
-                _errorNum = Interop.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
+                _errorNum = Natives.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
                 ThrowErrorMessage(_errorNum, "Can not get period size.");
             }
 
-            bufferSize = (uint) (frames * header.BlockAlign);
+            bufferSize = (uint)(frames * header.BlockAlign);
             byte[] readBuffer = new byte[bufferSize];
             fixed (byte* buffer = readBuffer)
             {
                 while (State != State.Stopping)
                 {
-                    _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr) buffer, frames);
+                    _errorNum = (int)Natives.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage(_errorNum, "Can not read data from the device.");
                     saveStream.Write(readBuffer);
                 }
@@ -488,17 +489,17 @@ namespace SoundCore.Standard
 
             fixed (int* dirP = &dir)
             {
-                _errorNum = Interop.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
+                _errorNum = Natives.snd_pcm_hw_params_get_period_size(@params, &frames, dirP);
                 ThrowErrorMessage(_errorNum, "Can not get period size.");
             }
 
-            bufferSize = (uint) (frames * header.BlockAlign);
+            bufferSize = (uint)(frames * header.BlockAlign);
             byte[] readBuffer = new byte[bufferSize];
             fixed (byte* buffer = readBuffer)
             {
                 while (State != State.Stopping)
                 {
-                    _errorNum = Interop.snd_pcm_readi(_recordingPcm, (IntPtr) buffer, frames);
+                    _errorNum = (int)Natives.snd_pcm_readi(_recordingPcm, (IntPtr)buffer, frames);
                     ThrowErrorMessage(_errorNum, "Can not read data from the device.");
                     OnMessage?.Invoke(this, new RecordEventArgs()
                     {
@@ -513,20 +514,12 @@ namespace SoundCore.Standard
         {
             try
             {
-                int state = Interop.snd_pcm_state(pcm);
+                snd_pcm_state_t state = Natives.snd_pcm_state(pcm);
                 if (state < 0)
                 {
                     ThrowErrorMessage(_errorNum, "Can not get pcm state.");
                 }
-
-                if (Enum.TryParse(state.ToString(), out snd_pcm_state_t value))
-                {
-                    return value;
-                }
-                else
-                {
-                    throw new Exception("Pcm state error.");
-                }
+                return state;
             }
             catch (Exception ex)
             {
@@ -543,19 +536,19 @@ namespace SoundCore.Standard
 
             lock (mixerInitializationLock)
             {
-                _errorNum = Interop.snd_mixer_open(ref _mixer, 0);
+                _errorNum = Natives.snd_mixer_open(ref _mixer, 0);
                 ThrowErrorMessage(_errorNum, "Can not open sound device mixer.");
 
-                _errorNum = Interop.snd_mixer_attach(_mixer, _settings.MixerDeviceName);
+                _errorNum = Natives.snd_mixer_attach(_mixer, _settings.MixerDeviceName);
                 ThrowErrorMessage(_errorNum, "Can not attach sound device mixer.");
 
-                _errorNum = Interop.snd_mixer_selem_register(_mixer, IntPtr.Zero, IntPtr.Zero);
+                _errorNum = Natives.snd_mixer_selem_register(_mixer, IntPtr.Zero, IntPtr.Zero);
                 ThrowErrorMessage(_errorNum, "Can not register sound device mixer.");
 
-                _errorNum = Interop.snd_mixer_load(_mixer);
+                _errorNum = Natives.snd_mixer_load(_mixer);
                 ThrowErrorMessage(_errorNum, "Can not load sound device mixer.");
 
-                _elem = Interop.snd_mixer_first_elem(_mixer);
+                _elem = Natives.snd_mixer_first_elem(_mixer);
             }
         }
 
@@ -563,7 +556,7 @@ namespace SoundCore.Standard
         {
             if (_mixer != default)
             {
-                _errorNum = Interop.snd_mixer_close(_mixer);
+                _errorNum = Natives.snd_mixer_close(_mixer);
                 ThrowErrorMessage(_errorNum, "Close sound device mixer error.");
 
                 _mixer = default;
@@ -632,19 +625,19 @@ namespace SoundCore.Standard
             {
                 WavHeader header = new WavHeader
                 {
-                    ChunkId = new[] {'R', 'I', 'F', 'F'},
+                    ChunkId = new[] { 'R', 'I', 'F', 'F' },
                     ChunkSize =
                         0, //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8 + 36,
-                    Format = new[] {'W', 'A', 'V', 'E'},
-                    Subchunk1ID = new[] {'f', 'm', 't', ' '},
+                    Format = new[] { 'W', 'A', 'V', 'E' },
+                    Subchunk1ID = new[] { 'f', 'm', 't', ' ' },
                     Subchunk1Size = 16,
                     AudioFormat = 1, //PCM音频数据的值为1
                     NumChannels = _settings.Channels,
                     SampleRate = _settings.SampleRate,
                     ByteRate = _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8,
-                    BlockAlign = (ushort) (_settings.BitsPerSample * _settings.Channels / 8),
+                    BlockAlign = (ushort)(_settings.BitsPerSample * _settings.Channels / 8),
                     BitsPerSample = _settings.BitsPerSample,
-                    Subchunk2Id = new[] {'d', 'a', 't', 'a'},
+                    Subchunk2Id = new[] { 'd', 'a', 't', 'a' },
                     Subchunk2Size = 0 //second * _settings.SampleRate * _settings.BitsPerSample * _settings.Channels / 8
                 };
 
@@ -660,7 +653,7 @@ namespace SoundCore.Standard
         {
             if (errnum < 0)
             {
-                string errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(errnum));
+                string errorMsg = Marshal.PtrToStringAnsi(Natives.snd_strerror(errnum));
                 Dispose();
                 throw new Exception($"{message}\nError {errnum}. {errorMsg}.");
             }
