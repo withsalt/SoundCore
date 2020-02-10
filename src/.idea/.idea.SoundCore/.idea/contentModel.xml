@@ -16,22 +16,6 @@
           <e p="AlsaSequencer.cs" t="Include" />
           <e p="AlsaSubscriptionQuery.cs" t="Include" />
           <e p="AlsaSystemInfo.cs" t="Include" />
-          <e p="Interop" t="Include">
-            <e p="Alsa" t="Include">
-              <e p="Interop.alsa.cs" t="Include" />
-              <e p="Interop.alsa.struct.cs" t="Include" />
-            </e>
-            <e p="Interop.Libraries.cs" t="Include" />
-            <e p="Libc" t="Include">
-              <e p="Interop.close.cs" t="Include" />
-              <e p="Interop.ioctl.cs" t="Include" />
-              <e p="Interop.mmap.cs" t="Include" />
-              <e p="Interop.munmap.cs" t="Include" />
-              <e p="Interop.open.cs" t="Include" />
-              <e p="Interop.read.cs" t="Include" />
-              <e p="Interop.write.cs" t="Include" />
-            </e>
-          </e>
           <e p="alsa-interop.cs" t="Include" />
         </e>
         <e p="Enums" t="Include">
