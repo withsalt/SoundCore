@@ -2,10 +2,20 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$USER_HOME$/.Rider2019.3/system/extResources" t="IncludeRecursive" />
-    <e p="$USER_HOME$/.Rider2019.3/system/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_SoundCore.1407258911.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.Rider2019.3/system/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_SoundCore.1806783070.00" t="ExcludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p="SoundCore" t="IncludeRecursive">
         <e p="Alsa" t="Include">
+          <e p="AllEnums.cs" t="Include" />
+          <e p="AlsaCard.cs" t="Include" />
+          <e p="AlsaClientInfo.cs" t="Include" />
+          <e p="AlsaException.cs" t="Include" />
+          <e p="AlsaMidiApi.cs" t="Include" />
+          <e p="AlsaPortInfo.cs" t="Include" />
+          <e p="AlsaPortSubscription.cs" t="Include" />
+          <e p="AlsaSequencer.cs" t="Include" />
+          <e p="AlsaSubscriptionQuery.cs" t="Include" />
+          <e p="AlsaSystemInfo.cs" t="Include" />
           <e p="Interop" t="Include">
             <e p="Alsa" t="Include">
               <e p="Interop.alsa.cs" t="Include" />
@@ -22,6 +32,7 @@
               <e p="Interop.write.cs" t="Include" />
             </e>
           </e>
+          <e p="alsa-interop.cs" t="Include" />
         </e>
         <e p="Enums" t="Include">
           <e p="State.cs" t="Include" />
