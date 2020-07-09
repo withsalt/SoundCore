@@ -19,11 +19,11 @@ namespace SoundCore
                 {
                     throw new Exception("Plase install 'libasound2-dev' at first.");
                 }
-                return new SoundCoreLinux(settings);
+                return new SoundCoreLinuxAlsa(settings);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return new SoundCoreWindows(settings);
+                return new SoundCoreWindowsNAudio(settings);
             }
             else
             {

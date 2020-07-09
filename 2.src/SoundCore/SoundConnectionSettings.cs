@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SoundCore.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -21,6 +22,8 @@ namespace SoundCore
             this.SampleRate = sampleRate;
             this.Channels = channels;
         }
+
+        public SoundProvider SoundProvider { get; set; } = SoundProvider.Alsa;
 
         /// <summary>
         /// The playback device name of the sound device is connected to.

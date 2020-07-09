@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SoundCore.Standard
 {
-    public sealed class SoundCoreWindows : ISoundCore
+    public sealed class SoundCoreWindowsNAudio : ISoundCore
     {
         private static readonly Queue<DataCache> _cache = new Queue<DataCache>();
         private static readonly object _cacheLocker = new object();
@@ -23,7 +23,7 @@ namespace SoundCore.Standard
         /// </summary>
         public event EventHandler<RecordEventArgs> OnMessage;
 
-        public SoundCoreWindows(SoundConnectionSettings settings)
+        public SoundCoreWindowsNAudio(SoundConnectionSettings settings)
         {
             if (settings == null)
             {

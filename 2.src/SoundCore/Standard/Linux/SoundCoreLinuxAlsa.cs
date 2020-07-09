@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SoundCore.Standard
 {
-    public class SoundCoreLinux : ISoundCore
+    public class SoundCoreLinuxAlsa : ISoundCore
     {
         private IntPtr _playbackPcm;
         private IntPtr _recordingPcm;
@@ -33,7 +33,7 @@ namespace SoundCore.Standard
 
         public event EventHandler<RecordEventArgs> OnMessage;
 
-        public SoundCoreLinux(SoundConnectionSettings settings)
+        public SoundCoreLinuxAlsa(SoundConnectionSettings settings)
         {
             _settings = settings;
             OpenPlaybackPcm();
