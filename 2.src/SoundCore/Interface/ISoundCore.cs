@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SoundCore.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,8 @@ namespace SoundCore
 {
     public interface ISoundCore : IDisposable
     {
+        SoundConnectionSettings Settings { get; }
+
         #region Event
 
         /// <summary>
@@ -43,10 +46,10 @@ namespace SoundCore
         /// <summary>
         /// 录音为Wav
         /// </summary>
-        void RecordWav();
+        void RecordWav(string path, int second);
 
         /// <summary>
-        /// 录音为PCM
+        /// 录音为PCM，通过OnMessage返回录音数据
         /// </summary>
         void Record();
 
@@ -60,6 +63,8 @@ namespace SoundCore
         /// </summary>
         /// <returns></returns>
         bool Stop();
+
+        List<SoundDevice> ListDevices();
 
         #endregion
     }

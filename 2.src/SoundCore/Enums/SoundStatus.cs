@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SoundCore
 {
-    public enum State
+    public enum SoundStatus
     {
         Init,
         Inited,

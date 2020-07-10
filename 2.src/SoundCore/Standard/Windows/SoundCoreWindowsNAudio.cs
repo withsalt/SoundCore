@@ -1,4 +1,6 @@
-﻿using NAudio.Wave;
+﻿using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using SoundCore.Enums;
 using SoundCore.Model;
 using System;
 using System.Collections.Generic;
@@ -11,12 +13,12 @@ namespace SoundCore.Standard
 {
     public sealed class SoundCoreWindowsNAudio : ISoundCore
     {
-        private static readonly Queue<DataCache> _cache = new Queue<DataCache>();
+        private static readonly Queue<BufferCache> _cache = new Queue<BufferCache>();
         private static readonly object _cacheLocker = new object();
         private static Task _playDataTask = null;
         private static IWaveIn _waveIn = null;
 
-        private static SoundConnectionSettings _settings;
+        public SoundConnectionSettings Settings { get; internal set; }
 
         /// <summary>
         /// 录音结果
@@ -29,12 +31,12 @@ namespace SoundCore.Standard
             {
                 throw new Exception("SoundConnectionSettings can not null.");
             }
-            _settings = settings;
+            this.Settings = settings;
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void Play(byte[] data, bool isLast = false)
@@ -51,7 +53,7 @@ namespace SoundCore.Standard
             }
             lock (_cacheLocker)
             {
-                _cache.Enqueue(new DataCache(data, isLast));
+                _cache.Enqueue(new BufferCache(data, isLast));
             }
         }
 
@@ -100,7 +102,7 @@ namespace SoundCore.Standard
             }
         }
 
-        public void RecordWav()
+        public void RecordWav(string path, int second)
         {
             using (MemoryStream outStream = new MemoryStream())
             {
@@ -159,9 +161,9 @@ namespace SoundCore.Standard
             try
             {
                 using WaveOutEvent wo = new WaveOutEvent();
-                BufferedWaveProvider rs = new BufferedWaveProvider(new WaveFormat((int)_settings.SampleRate, _settings.Channels))
+                BufferedWaveProvider rs = new BufferedWaveProvider(new WaveFormat((int)Settings.SampleRate, Settings.Channels))
                 {
-                    BufferLength = _settings.MaxBufferLength,  //请保证播放缓冲区足够大
+                    BufferLength = Settings.MaxBufferLength,  //请保证播放缓冲区足够大
                     DiscardOnBufferOverflow = true
                 };
                 wo.Init(rs);
@@ -169,7 +171,7 @@ namespace SoundCore.Standard
 
                 while (!status)
                 {
-                    DataCache data = null;
+                    BufferCache data = null;
                     lock (_cacheLocker)
                     {
                         if (_cache.Count == 0)
@@ -213,6 +215,51 @@ namespace SoundCore.Standard
             throw new NotImplementedException();
         }
 
+        public List<SoundDevice> ListDevices()
+        {
+            List<SoundDevice> devices = new List<SoundDevice>();
+
+            MMDeviceEnumerator enumberator = new MMDeviceEnumerator();
+            MMDeviceCollection deviceCollection = enumberator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.All);
+
+            
+            for (int i = -1; i < WaveInEvent.DeviceCount; i++)
+            {
+                WaveInCapabilities deviceInfo = WaveInEvent.GetCapabilities(i);
+                foreach (MMDevice device in deviceCollection)
+                {
+                    if (device.FriendlyName.StartsWith(deviceInfo.ProductName))
+                    {
+                        devices.Add(new SoundDevice()
+                        {
+                            Id = device.ID,
+                            Name = device.FriendlyName,
+                            Type = DeviceType.Input
+                        });
+                        break;
+                    }
+                }
+            }
+
+            for (int i = -1; i < WaveOut.DeviceCount; i++)
+            {
+                WaveInCapabilities deviceInfo = WaveInEvent.GetCapabilities(i);
+                foreach (MMDevice device in deviceCollection)
+                {
+                    if (device.FriendlyName.StartsWith(deviceInfo.ProductName))
+                    {
+                        devices.Add(new SoundDevice()
+                        {
+                            Id = device.ID,
+                            Name = device.FriendlyName,
+                            Type = DeviceType.Output
+                        });
+                        break;
+                    }
+                }
+            }
+            return devices;
+        }
         #endregion
     }
 }

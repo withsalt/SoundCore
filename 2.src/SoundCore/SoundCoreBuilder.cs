@@ -1,4 +1,5 @@
 ﻿using SoundCore.Standard;
+using SoundIOSharp;
 using System;
 using System.Runtime.InteropServices;
 
@@ -13,7 +14,7 @@ namespace SoundCore
                 //Test libasound2-dev
                 try
                 {
-                    Interop.snd_strerror(0);
+                    _ = SoundIO.VersionString;
                 }
                 catch
                 {

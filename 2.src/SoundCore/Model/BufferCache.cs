@@ -4,20 +4,20 @@ using System.Text;
 
 namespace SoundCore.Model
 {
-    public class DataCache
+    public class BufferCache
     {
-        public DataCache()
+        public BufferCache()
         {
 
         }
 
-        public DataCache(byte[] buffer)
+        public BufferCache(byte[] buffer)
         {
             this.Data = buffer;
             this.IsEnd = false;
         }
 
-        public DataCache(byte[] buffer, bool isEnd)
+        public BufferCache(byte[] buffer, bool isEnd)
         {
             this.Data = buffer;
             this.IsEnd = isEnd;
