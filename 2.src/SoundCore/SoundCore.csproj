@@ -6,15 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NAudio" Version="1.8.0" />
+    <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.22" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Libs\OSX\libsoundio.dylib">
+    <None Update="libsoundio.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Libs\Linux\libsoundio.so">
+    <None Update="libsoundio.dylib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="soundio.lib">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
