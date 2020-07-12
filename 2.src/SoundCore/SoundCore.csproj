@@ -10,4 +10,13 @@
     <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.22" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Libs\OSX\libsoundio.dylib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Libs\Linux\libsoundio.so">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

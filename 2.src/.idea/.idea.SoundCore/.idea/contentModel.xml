@@ -1,32 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/.Rider2019.3/system/extResources" t="IncludeRecursive" />
-    <e p="$USER_HOME$/.Rider2019.3/system/resharper-host/local/Transient/ReSharperHost/v193/SolutionCaches/_SoundCore.1806783070.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.1/resharper-host/local/Transient/ReSharperHost/v201/SolutionCaches/_SoundCore.506742284.00" t="ExcludeRecursive" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
-      <e p="SoundCore" t="IncludeRecursive">
-        <e p="Alsa" t="Include">
-          <e p="AllEnums.cs" t="Include" />
-          <e p="AlsaCard.cs" t="Include" />
-          <e p="AlsaClientInfo.cs" t="Include" />
-          <e p="AlsaException.cs" t="Include" />
-          <e p="AlsaMidiApi.cs" t="Include" />
-          <e p="AlsaPortInfo.cs" t="Include" />
-          <e p="AlsaPortSubscription.cs" t="Include" />
-          <e p="AlsaSequencer.cs" t="Include" />
-          <e p="AlsaSubscriptionQuery.cs" t="Include" />
-          <e p="AlsaSystemInfo.cs" t="Include" />
-          <e p="alsa-interop.cs" t="Include" />
+      <e p="SC.ListDevices" t="IncludeRecursive">
+        <e p="Program.cs" t="Include" />
+        <e p="SC.ListDevices.csproj" t="IncludeRecursive" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="SC.ListDevices.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
         </e>
+      </e>
+      <e p="SoundCore" t="IncludeRecursive">
         <e p="Enums" t="Include">
-          <e p="State.cs" t="Include" />
+          <e p="DeviceType.cs" t="Include" />
+          <e p="SoundProvider.cs" t="Include" />
+          <e p="SoundStatus.cs" t="Include" />
         </e>
         <e p="Interface" t="Include">
           <e p="ISoundCore.cs" t="Include" />
         </e>
+        <e p="Libs" t="Include">
+          <e p="Linux" t="Include">
+            <e p="libsoundio.so" t="Include" />
+          </e>
+          <e p="OSX" t="Include">
+            <e p="libsoundio.dylib" t="Include" />
+          </e>
+          <e p="Windows" t="Include" />
+        </e>
         <e p="Model" t="Include">
-          <e p="DataCache.cs" t="Include" />
+          <e p="BufferCache.cs" t="Include" />
           <e p="RecordEventArgs.cs" t="Include" />
+          <e p="SoundDevice.cs" t="Include" />
           <e p="WavHeader.cs" t="Include" />
         </e>
         <e p="Readme.txt" t="Include" />
@@ -34,8 +45,39 @@
         <e p="SoundCore.csproj" t="IncludeRecursive" />
         <e p="SoundCoreBuilder.cs" t="Include" />
         <e p="Standard" t="Include">
-          <e p="SoundCoreLinux.cs" t="Include" />
-          <e p="SoundCoreWindows.cs" t="Include" />
+          <e p="Linux" t="Include">
+            <e p="SoundCoreLinuxAlsa.cs" t="Include" />
+            <e p="SoundCoreLinuxOpenTk.cs" t="Include" />
+          </e>
+          <e p="Windows" t="Include">
+            <e p="SoundCoreWindowsNAudio.cs" t="Include" />
+            <e p="SoundCoreWindowsOpenTk.cs" t="Include" />
+          </e>
+        </e>
+        <e p="Utils" t="Include">
+          <e p="WavHelper.cs" t="Include" />
+          <e p="libsoundio" t="Include">
+            <e p="MarshalExtensions.cs" t="Include" />
+            <e p="SoundIO.cs" t="Include" />
+            <e p="SoundIOBackend.cs" t="Include" />
+            <e p="SoundIOChannelArea.cs" t="Include" />
+            <e p="SoundIOChannelAreas.cs" t="Include" />
+            <e p="SoundIOChannelId.cs" t="Include" />
+            <e p="SoundIOChannelLayout.cs" t="Include" />
+            <e p="SoundIODevice.cs" t="Include" />
+            <e p="SoundIODeviceAim.cs" t="Include" />
+            <e p="SoundIOException.cs" t="Include" />
+            <e p="SoundIOFormat.cs" t="Include" />
+            <e p="SoundIOInStream.cs" t="Include" />
+            <e p="SoundIOOutStream.cs" t="Include" />
+            <e p="SoundIORingBuffer.cs" t="Include" />
+            <e p="SoundIOSampleRateRange.cs" t="Include" />
+            <e p="libs" t="Include">
+              <e p="libsoundio.dylib" t="Include" />
+              <e p="libsoundio.so" t="Include" />
+            </e>
+            <e p="libsoundio-interop.cs" t="Include" />
+          </e>
         </e>
         <e p="bin" t="ExcludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
