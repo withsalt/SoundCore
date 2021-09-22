@@ -8,6 +8,8 @@ master仍然在开发中，并不能直接使用。目前支持Windows音频播�
 在Linux中播放和录制时，依赖于alsa，所以请先安装以下库：
 ````shell
 sudo apt install libasound2-dev
+sudo apt install libopenal0a libopenal-dev
+sudo apt install libalut0 libalut-dev
 ````
 
 ## How to start
